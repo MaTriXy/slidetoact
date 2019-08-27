@@ -14,6 +14,7 @@ import android.support.annotation.RequiresApi
 import android.support.graphics.drawable.AnimatedVectorDrawableCompat
 import android.support.graphics.drawable.VectorDrawableCompat
 import android.support.v4.content.ContextCompat
+import android.support.v4.widget.TextViewCompat
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.util.Xml
@@ -22,6 +23,7 @@ import android.view.View
 import android.view.ViewOutlineProvider
 import android.view.animation.AnticipateOvershootInterpolator
 import android.view.animation.OvershootInterpolator
+import android.widget.TextView
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 
@@ -62,6 +64,8 @@ class SlideToActView @JvmOverloads constructor (
     var text: CharSequence = ""
         set(value) {
             field = value
+            mTextView.text = value
+            mTextPaint.set(mTextView.paint)
             invalidate()
         }
 
@@ -69,22 +73,27 @@ class SlideToActView @JvmOverloads constructor (
     var typeFace = Typeface.NORMAL
         set(value) {
             field = value
-            mTextPaint.typeface = Typeface.create("sans-serif-light" , value)
+            mTextView.typeface = Typeface.create("sans-serif-light" , value)
+            mTextPaint.set(mTextView.paint)
             invalidate()
         }
 
-    /** Size for the text message */
-    private val mTextSize: Int
+    /** Text Appearance used to fully customize the font */
+    var textAppearance : Int = 0
+        set(value) {
+            field = value
+            if (value != 0) {
+                TextViewCompat.setTextAppearance(mTextView, value)
+                mTextPaint.set(mTextView.paint)
+                mTextPaint.color = mTextView.currentTextColor
+            }
+        }
 
-    private var mTextYPosition = -1f
-    private var mTextXPosition = -1f
-
-    /** Outer color used by the slider (primary) */
+    /** Outer color used by the slider (primary)*/
     var outerColor: Int = 0
         set(value) {
             field = value
             mOuterPaint.color = value
-            mDrawableArrow.setTint(value)
             invalidate()
         }
 
@@ -99,11 +108,20 @@ class SlideToActView @JvmOverloads constructor (
     var textColor: Int = 0
         set(value) {
             field = value
-            mTextPaint.color = value
+            mTextView.setTextColor(value)
+            mTextPaint.color = textColor
             invalidate()
         }
 
-    /** Slider cursor position (between 0 and (`reaWidth - mAreaHeight)) */
+    /** Custom Icon color */
+    var iconColor: Int = 0
+        set(value) {
+            field = value
+            mDrawableArrow.setTint(value)
+            invalidate()
+        }
+
+    /** Slider cursor position (between 0 and (`mAreaWidth - mAreaHeight)) */
     private var mPosition: Int = 0
         set(value) {
             field = value
@@ -115,7 +133,27 @@ class SlideToActView @JvmOverloads constructor (
             }
             mPositionPerc = value.toFloat() / (mAreaWidth - mAreaHeight).toFloat()
             mPositionPercInv = 1 - value.toFloat() / (mAreaWidth - mAreaHeight).toFloat()
+            mEffectivePosition = mPosition
         }
+
+    /** Slider cursor effective position. This is used to handle the `reversed` scenario. */
+    private var mEffectivePosition : Int = 0
+        set(value) {
+            field = if (isReversed) (mAreaWidth - mAreaHeight) - value else value
+        }
+
+    /** Positioning of text */
+    private var mTextYPosition = -1f
+    private var mTextXPosition = -1f
+
+    /** Private size for the text message */
+    private var mTextSize: Int = 0
+        set(value) {
+            field = value
+            mTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX, mTextSize.toFloat())
+            mTextPaint.set(mTextView.paint)
+        }
+
     /** Slider cursor position in percentage (between 0f and 1f) */
     private var mPositionPerc: Float = 0f
     /** 1/mPositionPerc */
@@ -139,7 +177,7 @@ class SlideToActView @JvmOverloads constructor (
     private var mFlagDrawTick: Boolean = false
 
     /** The icon for the drawable */
-    private var mIcon: Int = R.drawable.ic_arrow
+    private var mIcon: Int = R.drawable.slidetoact_ic_arrow
 
     /* -------------------- PAINT & DRAW -------------------- */
     /** Paint used for outer elements */
@@ -149,7 +187,10 @@ class SlideToActView @JvmOverloads constructor (
     private val mInnerPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
     /** Paint used for text elements */
-    private val mTextPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private var mTextPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
+
+    /** TextView used for text elements */
+    private var mTextView: TextView
 
     /** Inner rectangle (used for arrow rotation) */
     private var mInnerRect: RectF
@@ -169,8 +210,20 @@ class SlideToActView @JvmOverloads constructor (
     /** Public flag to lock the slider */
     var isLocked = false
 
+    /** Public flag to reverse the slider by 180 degree */
+    var isReversed = false
+        set(value) {
+            field = value
+            // We reassign the position field to trigger the re-computation of the effective position.
+            mPosition = mPosition
+            invalidate()
+        }
+
     /** Public flag to lock the rotation icon */
     var isRotateIcon = true
+
+    /** Public flag to enable complete animation */
+    var isAnimateCompletion = true
 
     /** Public Slide event listeners */
     var onSlideToActAnimationEventListener: OnSlideToActAnimationEventListener? = null
@@ -182,6 +235,10 @@ class SlideToActView @JvmOverloads constructor (
         val actualOuterColor : Int
         val actualInnerColor : Int
         val actualTextColor : Int
+        val actualIconColor : Int
+
+        mTextView = TextView(context)
+        mTextPaint = mTextView.paint
 
         val layoutAttrs: TypedArray = context.theme.obtainStyledAttributes(attrs,
             R.styleable.SlideToActView, defStyleAttr, R.style.SlideToActView)
@@ -192,30 +249,56 @@ class SlideToActView @JvmOverloads constructor (
 
             mBorderRadius = layoutAttrs.getDimensionPixelSize(R.styleable.SlideToActView_border_radius, -1)
 
-            val defaultOuter = ContextCompat.getColor(this.context, R.color.defaultAccent)
-            val defaultWhite = ContextCompat.getColor(this.context, R.color.white)
+            val defaultOuter = ContextCompat.getColor(this.context, R.color.slidetoact_defaultAccent)
+            val defaultWhite = ContextCompat.getColor(this.context, R.color.slidetoact_white)
 
             actualOuterColor = layoutAttrs.getColor(R.styleable.SlideToActView_outer_color, defaultOuter)
             actualInnerColor = layoutAttrs.getColor(R.styleable.SlideToActView_inner_color, defaultWhite)
-            actualTextColor = layoutAttrs.getColor(R.styleable.SlideToActView_text_color, defaultWhite)
+
+            // For text color, check if the `text_color` is set.
+            // if not check if the `outer_color` is set.
+            // if not, default to white.
+            actualTextColor = when {
+                layoutAttrs.hasValue(R.styleable.SlideToActView_text_color) ->
+                    layoutAttrs.getColor(R.styleable.SlideToActView_text_color, defaultWhite)
+                layoutAttrs.hasValue(R.styleable.SlideToActView_inner_color) -> actualInnerColor
+                else -> defaultWhite
+            }
 
             text = layoutAttrs.getString(R.styleable.SlideToActView_text)
             typeFace = layoutAttrs.getInt(R.styleable.SlideToActView_text_style, 0)
+            mTextSize = layoutAttrs.getDimensionPixelSize(R.styleable.SlideToActView_text_size, resources.getDimensionPixelSize(R.dimen.slidetoact_default_text_size))
+            textColor = actualTextColor
+
+            // TextAppearance is the last as will have precedence over everything text related.
+            textAppearance = layoutAttrs.getResourceId(R.styleable.SlideToActView_text_appearance, 0)
 
             isLocked = layoutAttrs.getBoolean(R.styleable.SlideToActView_slider_locked, false)
+            isReversed = layoutAttrs.getBoolean(R.styleable.SlideToActView_slider_reversed, false)
             isRotateIcon = layoutAttrs.getBoolean(R.styleable.SlideToActView_rotate_icon, true)
+            isAnimateCompletion = layoutAttrs.getBoolean(R.styleable.SlideToActView_animate_completion, true)
 
-            mTextSize = layoutAttrs.getDimensionPixelSize(R.styleable.SlideToActView_text_size, resources.getDimensionPixelSize(R.dimen.default_text_size))
-            mOriginAreaMargin = layoutAttrs.getDimensionPixelSize(R.styleable.SlideToActView_area_margin, resources.getDimensionPixelSize(R.dimen.default_area_margin))
+            mOriginAreaMargin = layoutAttrs.getDimensionPixelSize(R.styleable.SlideToActView_area_margin, resources.getDimensionPixelSize(R.dimen.slidetoact_default_area_margin))
             mActualAreaMargin = mOriginAreaMargin
 
-            mIcon = layoutAttrs.getResourceId(R.styleable.SlideToActView_slider_icon, R.drawable.ic_arrow)
+            mIcon = layoutAttrs.getResourceId(R.styleable.SlideToActView_slider_icon, R.drawable.slidetoact_ic_arrow)
+
+            // For icon color. check if the `slide_icon_color` is set.
+            // if not check if the `outer_color` is set.
+            // if not, default to defaultOuter.
+            actualIconColor = when {
+                layoutAttrs.hasValue(R.styleable.SlideToActView_slider_icon_color) ->
+                    layoutAttrs.getColor(R.styleable.SlideToActView_slider_icon_color, defaultOuter)
+                layoutAttrs.hasValue(R.styleable.SlideToActView_outer_color) -> actualOuterColor
+                else -> defaultOuter
+            }
         } finally {
             layoutAttrs.recycle()
         }
 
-        mInnerRect = RectF((mActualAreaMargin + mPosition).toFloat(), mActualAreaMargin.toFloat(),
-            (mAreaHeight + mPosition).toFloat() - mActualAreaMargin.toFloat(),
+        mInnerRect = RectF((mActualAreaMargin + mEffectivePosition).toFloat(),
+                mActualAreaMargin.toFloat(),
+            (mAreaHeight + mEffectivePosition).toFloat() - mActualAreaMargin.toFloat(),
             mAreaHeight.toFloat() - mActualAreaMargin.toFloat())
 
         mOuterRect = RectF(mActualAreaWidth.toFloat(), 0f, mAreaWidth.toFloat() - mActualAreaWidth.toFloat(), mAreaHeight.toFloat())
@@ -224,19 +307,18 @@ class SlideToActView @JvmOverloads constructor (
 
         // Due to bug in the AVD implementation in the support library, we use it only for API < 21
         mDrawableTick = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            context.resources.getDrawable(R.drawable.animated_ic_check, context.theme) as AnimatedVectorDrawable
+            context.resources.getDrawable(R.drawable.slidetoact_animated_ic_check, context.theme) as AnimatedVectorDrawable
         } else {
-            AnimatedVectorDrawableCompat.create(context, R.drawable.animated_ic_check)!!
+            AnimatedVectorDrawableCompat.create(context, R.drawable.slidetoact_animated_ic_check)!!
         }
 
         mTextPaint.textAlign = Paint.Align.CENTER
-        mTextPaint.textSize = mTextSize.toFloat()
 
         outerColor = actualOuterColor
         innerColor = actualInnerColor
-        textColor = actualTextColor
+        iconColor = actualIconColor
 
-        mIconMargin = context.resources.getDimensionPixelSize(R.dimen.default_icon_margin)
+        mIconMargin = context.resources.getDimensionPixelSize(R.dimen.slidetoact_default_icon_margin)
         mArrowMargin = mIconMargin
         mTickMargin = mIconMargin
 
@@ -282,6 +364,9 @@ class SlideToActView @JvmOverloads constructor (
         // Text horizontal/vertical positioning (both centered)
         mTextXPosition = mAreaWidth.toFloat() / 2
         mTextYPosition = (mAreaHeight.toFloat() / 2) - (mTextPaint.descent() + mTextPaint.ascent()) / 2
+
+        // Make sure the position is recomputed.
+        mPosition = 0
     }
 
     override fun onDraw(canvas: Canvas?) {
@@ -292,24 +377,29 @@ class SlideToActView @JvmOverloads constructor (
         mOuterRect.set(mActualAreaWidth.toFloat(), 0f, mAreaWidth.toFloat() - mActualAreaWidth.toFloat(), mAreaHeight.toFloat())
         canvas.drawRoundRect(mOuterRect, mBorderRadius.toFloat(), mBorderRadius.toFloat(), mOuterPaint)
 
+        // Text alpha
+        mTextPaint.alpha = (255 * mPositionPercInv).toInt()
+        // Checking if the TextView has a Transformation method applied (e.g. AllCaps).
+        val textToDraw = mTextView.transformationMethod?.getTransformation(text, mTextView) ?: text
+        canvas.drawText(textToDraw, 0, textToDraw.length, mTextXPosition, mTextYPosition, mTextPaint)
+
         // Inner Cursor
         // ratio is used to compute the proper border radius for the inner rect (see #8).
         val ratio = (mAreaHeight - 2 * mActualAreaMargin).toFloat() / mAreaHeight.toFloat()
-        mInnerRect.set((mActualAreaMargin + mPosition).toFloat(),
+        mInnerRect.set((mActualAreaMargin + mEffectivePosition).toFloat(),
                 mActualAreaMargin.toFloat(),
-                (mAreaHeight + mPosition).toFloat() - mActualAreaMargin.toFloat(),
+                (mAreaHeight + mEffectivePosition).toFloat() - mActualAreaMargin.toFloat(),
                 mAreaHeight.toFloat() - mActualAreaMargin.toFloat())
         canvas.drawRoundRect(mInnerRect, mBorderRadius.toFloat() * ratio, mBorderRadius.toFloat() * ratio, mInnerPaint)
 
-        // Text alpha
-        mTextPaint.alpha = (255 * mPositionPercInv).toInt()
-
-        // Vertical + Horizontal centering
-        canvas.drawText(text.toString(), mTextXPosition, mTextYPosition, mTextPaint)
-
         // Arrow angle
+        // We compute the rotation of the arrow and we apply .rotate transformation on the canvas.
+        canvas.save()
+        if (isReversed) {
+            canvas.rotate(180f, mInnerRect.centerX(), mInnerRect.centerY())
+        }
         if (isRotateIcon) {
-            mArrowAngle = -180 * mPositionPerc
+            mArrowAngle = 180 * mPositionPerc * (if (isReversed) 1 else -1)
             canvas.rotate(mArrowAngle, mInnerRect.centerX(), mInnerRect.centerY())
         }
         mDrawableArrow.setBounds(mInnerRect.left.toInt() + mArrowMargin,
@@ -320,10 +410,7 @@ class SlideToActView @JvmOverloads constructor (
             mDrawableArrow.bounds.top <= mDrawableArrow.bounds.bottom) {
             mDrawableArrow.draw(canvas)
         }
-
-        if (isRotateIcon) {
-            canvas.rotate(-1 * mArrowAngle, mInnerRect.centerX(), mInnerRect.centerY())
-        }
+        canvas.restore()
 
         // Tick drawing
         mDrawableTick.setBounds(
@@ -338,7 +425,6 @@ class SlideToActView @JvmOverloads constructor (
         } else {
             (mDrawableTick as AnimatedVectorDrawableCompat).setTint(innerColor)
         }
-
         if (mFlagDrawTick) {
             mDrawableTick.draw(canvas)
         }
@@ -411,17 +497,19 @@ class SlideToActView @JvmOverloads constructor (
      * @return A boolean that informs if user has pressed or not
      */
     private fun checkInsideButton(x: Float, y: Float): Boolean {
-        return (0 < y && y < mAreaHeight && mPosition < x && x < (mAreaHeight + mPosition))
+        return (0 < y && y < mAreaHeight && mEffectivePosition < x && x < (mAreaHeight + mEffectivePosition))
     }
 
     /**
      * Private method for increasing/decreasing the position
-     * Ensure that position never exits from its range [0, (mAreaWidth - mAreaHeight)]
+     * Ensure that position never exits from its range [0, (mAreaWidth - mAreaHeight)].
+     *
+     * Please note that the increment is inverted in case of a reversed slider.
      *
      * @param inc Increment to be performed (negative if it's a decrement)
      */
     private fun increasePosition(inc: Int) {
-        mPosition += inc
+        mPosition = if (isReversed) mPosition - inc else mPosition + inc
         if (mPosition < 0)
             mPosition = 0
         if (mPosition > (mAreaWidth - mAreaHeight))
@@ -482,11 +570,18 @@ class SlideToActView @JvmOverloads constructor (
             }
         }
 
-        if (mPosition >= mAreaWidth - mAreaHeight) {
-            animSet.playSequentially(marginAnimator, areaAnimator, tickAnimator)
-        } else {
-            animSet.playSequentially(finalPositionAnimator, marginAnimator, areaAnimator, tickAnimator)
+        val animators = mutableListOf<Animator>()
+        if (mPosition < mAreaWidth - mAreaHeight) {
+            animators.add(finalPositionAnimator)
         }
+
+        if (isAnimateCompletion) {
+            animators.add(marginAnimator)
+            animators.add(areaAnimator)
+            animators.add(tickAnimator)
+        }
+
+        animSet.playSequentially(*animators.toTypedArray())
 
         animSet.duration = 300
 
@@ -585,7 +680,13 @@ class SlideToActView @JvmOverloads constructor (
 
 
         marginAnimator.interpolator = OvershootInterpolator(2f)
-        animSet.playSequentially(tickAnimator, areaAnimator, positionAnimator, marginAnimator, arrowAnimator)
+
+        if (isAnimateCompletion) {
+            animSet.playSequentially(tickAnimator, areaAnimator, positionAnimator, marginAnimator, arrowAnimator)
+        } else {
+            animSet.playSequentially(positionAnimator)
+        }
+
         animSet.duration = 300
 
         animSet.addListener(object : Animator.AnimatorListener {

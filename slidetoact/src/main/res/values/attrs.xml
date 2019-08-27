@@ -15,8 +15,12 @@
         <attr name="border_radius" format="dimension" />
         <attr name="slider_height" format="dimension" />
         <attr name="slider_locked" format="boolean" />
+        <attr name="slider_reversed" format="boolean" />
         <attr name="slider_icon" format="reference" />
+        <attr name="slider_icon_color" format="color"/>
         <attr name="rotate_icon" format="boolean" />
+        <attr name="animate_completion" format="boolean" />
+        <attr name="text_appearance" format="reference" />
     </declare-styleable>
     <declare-styleable name="SlideToActViewTheme">
         <attr name="slideToActViewStyle" format="reference"/>

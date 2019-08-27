@@ -1,6 +1,6 @@
 # Slide To Act
 
-[![CircleCI](https://circleci.com/gh/cortinico/slidetoact/tree/master.svg?style=shield)](https://circleci.com/gh/cortinico/slidetoact/tree/master)  [ ![Download](https://api.bintray.com/packages/cortinico/maven/slidetoact/images/download.svg) ](https://bintray.com/cortinico/maven/slidetoact/_latestVersion) [![License](https://img.shields.io/badge/license-MIT%20License-brightgreen.svg)](https://opensource.org/licenses/MIT) [![Twitter](https://img.shields.io/badge/Twitter-@cortinico-blue.svg?style=flat)](http://twitter.com/cortinico)
+[![CircleCI](https://circleci.com/gh/cortinico/slidetoact/tree/master.svg?style=shield)](https://circleci.com/gh/cortinico/slidetoact/tree/master)  [ ![Download](https://api.bintray.com/packages/cortinico/maven/slidetoact/images/download.svg) ](https://bintray.com/cortinico/maven/slidetoact/_latestVersion) [![Android Weekly](https://img.shields.io/badge/Android%20Weekly-%23336-blue.svg)](http://androidweekly.net/issues/issue-336) [![License](https://img.shields.io/badge/license-MIT%20License-brightgreen.svg)](https://opensource.org/licenses/MIT) [![Twitter](https://img.shields.io/badge/Twitter-@cortinico-blue.svg?style=flat)](http://twitter.com/cortinico) [![Awesome Kotlin Badge](https://kotlin.link/awesome-kotlin.svg)](https://github.com/KotlinBy/awesome-kotlin)
 
 A simple *Slide to Unlock* **Material** widget for **Android**, written in [**Kotlin**](https://github.com/JetBrains/kotlin) 🇰.
 
@@ -15,9 +15,10 @@ A simple *Slide to Unlock* **Material** widget for **Android**, written in [**Ko
         * [``area_margin``](#area_margin)
         * [``inner_color`` & ``outer_color``](#inner_color--outer_color)
         * [``border_radius``](#border_radius)
-        * [``text``, ``text_size``, ``text_style``](#text-text_size-text_style)
+        * [``text``, ``text_size``, ``text_style``, ``text_appearance``](#text-text_size-text_style-text_appearance)
         * [``slider_height``](#slider_height)
         * [``slider_locked``](#slider_locked)
+        * [``slider_reversed``](#slider_reversed)
         * [``slider_icon``](#slider_icon)
         * [``rotate_icon``](#rotate_icon)
         * [``android:elevation``](#androidelevation)
@@ -38,18 +39,18 @@ A simple *Slide to Unlock* **Material** widget for **Android**, written in [**Ko
 If you're using the Android Gradle plugin version 3:
 ```groovy
 dependencies {
-   implementation 'com.ncorti:slidetoact:0.5.1'
+   implementation 'com.ncorti:slidetoact:0.7.0'
 }
 ```
 
 If you're using an Older version of the Android Gradle plugin:
 ```groovy
 dependencies {
-   compile 'com.ncorti:slidetoact:0.5.1'
+   compile 'com.ncorti:slidetoact:0.7.0'
 }
 ```
 
-Or you can download the .AAR artifact [directly from Bintray](https://bintray.com/cortinico/maven/download_file?file_path=com%2Fncorti%2Fslidetoact%2F0.5.1%2Fslidetoact-0.5.1.aar).
+Or you can download the .AAR artifact [directly from Bintray](https://bintray.com/cortinico/maven/download_file?file_path=com%2Fncorti%2Fslidetoact%2F0.6.0%2Fslidetoact-0.6.0.aar).
 
 ## Example 🚸
 
@@ -123,7 +124,7 @@ Use the ``border_radius`` attribute to control the **radius** of the **inner cir
 
 <p align="center"><img src="assets/border_radius_1.png" alt="border_radius_1" width="40%"/> <img src="assets/border_radius_2.png" alt="border_radius_2" width="40%"/></p>
 
-#### ``text``, ``text_size``, ``text_style``
+#### ``text``, ``text_size``, ``text_style``, ``text_appearance``
 
 Use the ``text`` attribute to control the **text of your slider**. If not set, this attribute defaults to **SlideToActView**. 
 
@@ -131,7 +132,10 @@ Use the ``text_size`` attribute to control the **size** of the **text of your sl
 
 Use the ``text_style`` attribute to control the **style** of your text. Accepted values are ``normal``, ``bold`` and ``italic``.
 
-<p align="center"><img src="assets/text.png" alt="text" width="40%"/></p>
+Use the ``text_appearance`` attribute to provide an Android `TextAppearance` style to fully customize your Text.
+Please use this attribute if you want to use a **custom font** or set the text to be **all caps**.
+
+<p align="center"><img src="assets/text.png" alt="slider_text" width="40%"/> <img src="assets/text_appearance.png" alt="slider_text_appearance" width="40%"/></p>
 
 #### ``slider_height``
 
@@ -154,6 +158,20 @@ SlideToActView sta = (SlideToActView) findViewById(R.id.slider);
 sta.setLocked(true);
 ```
 
+#### ``slider_reversed``
+
+Use the ``slider_reversed`` attribute to **reverse the slider** (this is a boolean attribute). When a slider is reversed, the cursor will appear on the right and will progress to the left. (default is false).
+
+<p align="center">
+  <img src="assets/reversed_slider.gif" alt="reversed_slider gif"/>
+</p>
+
+You can also toggle this attribute programmatically with the provided setter.
+
+```java
+SlideToActView sta = (SlideToActView) findViewById(R.id.slider);
+sta.setReversed(true);
+```
 
 #### ``slider_icon``
 
@@ -168,6 +186,16 @@ app:slider_icon="@drawable/custom_icon"
 ```
 
 You can also disable the rotation by setting the ``rotate_icon`` attribute to false.
+
+#### ``slider_icon_color``
+
+You can set a custom color for the icon by setting the ``slider_icon_color`` attribute.
+
+<p align="center">
+  <img src="assets/slider_icon_color.png" alt="custom_icon" width="40%"/>
+</p>
+
+This attribute defaults to the ``outer_color`` if set. If ``outer_color`` is not set, this attribute defaults to **colorAccent** from your theme.
 
 #### ``android:elevation``
 
