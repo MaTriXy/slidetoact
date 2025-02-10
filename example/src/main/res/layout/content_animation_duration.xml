@@ -11,54 +11,40 @@
         android:clipToPadding="false"
         android:orientation="vertical">
 
-        <!-- No Text -->
         <com.ncorti.slidetoact.SlideToActView
             style="@style/SlideToActView.Example"
-            app:text="" />
+            app:animation_duration="2000"
+            app:text="Animation Duration 2000" />
 
         <com.ncorti.slidetoact.SlideToActView
             style="@style/SlideToActView.Example"
-            app:text_style="bold"
-            app:text="TextStyle Bold"/>
+            app:animation_duration="1000"
+            app:text="Animation Duration 1000" />
 
         <com.ncorti.slidetoact.SlideToActView
             style="@style/SlideToActView.Example"
-            app:text_style="italic"
-            app:text="TextStyle Italic"/>
+            app:animation_duration="500"
+            app:text="Animation Duration 500" />
 
         <com.ncorti.slidetoact.SlideToActView
             style="@style/SlideToActView.Example"
-            app:text_size="12sp"
-            app:text="TextSize 12sp" />
+            app:animation_duration="250"
+            app:text="Animation Duration 250" />
 
         <com.ncorti.slidetoact.SlideToActView
             style="@style/SlideToActView.Example"
-            app:text_size="14sp"
-            app:text="TextSize 14sp" />
+            app:animation_duration="125"
+            app:text="Animation Duration 125" />
 
         <com.ncorti.slidetoact.SlideToActView
             style="@style/SlideToActView.Example"
-            app:text_size="16sp"
-            app:text="TextSize 16sp" />
+            app:animation_duration="62"
+            app:text="Animation Duration 62" />
 
         <com.ncorti.slidetoact.SlideToActView
             style="@style/SlideToActView.Example"
-            app:text_size="18sp"
-            app:text="TextSize 18sp" />
-
-        <com.ncorti.slidetoact.SlideToActView
-            style="@style/SlideToActView.Example"
-            app:text_appearance="@style/TextAppearanceAllCaps"
-            app:text="TextAppearance - All caps" />
-
-        <com.ncorti.slidetoact.SlideToActView
-            style="@style/SlideToActView.Example"
-            app:text_appearance="@style/TextAppearanceBlueShadow"
-            app:text="TextAppearance - Blue Shadow" />
-
-        <com.ncorti.slidetoact.SlideToActView
-            style="@style/SlideToActView.Example"
-            app:text_appearance="@style/TextAppearanceCustomFont"
-            app:text="Custom font" />
+            app:animation_duration="0"
+            app:text="Animation Duration 0" />
     </LinearLayout>
+
 </ScrollView>

@@ -1,6 +1,6 @@
 # Slide To Act
 
-[![CircleCI](https://circleci.com/gh/cortinico/slidetoact/tree/master.svg?style=shield)](https://circleci.com/gh/cortinico/slidetoact/tree/master)  [ ![Download](https://api.bintray.com/packages/cortinico/maven/slidetoact/images/download.svg) ](https://bintray.com/cortinico/maven/slidetoact/_latestVersion) [![Android Weekly](https://img.shields.io/badge/Android%20Weekly-%23336-blue.svg)](http://androidweekly.net/issues/issue-336) [![License](https://img.shields.io/badge/license-MIT%20License-brightgreen.svg)](https://opensource.org/licenses/MIT) [![Twitter](https://img.shields.io/badge/Twitter-@cortinico-blue.svg?style=flat)](http://twitter.com/cortinico) [![Awesome Kotlin Badge](https://kotlin.link/awesome-kotlin.svg)](https://github.com/KotlinBy/awesome-kotlin)
+[![CircleCI](https://circleci.com/gh/cortinico/slidetoact/tree/master.svg?style=shield)](https://circleci.com/gh/cortinico/slidetoact/tree/master)  [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.ncorti/slidetoact/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.ncorti/slidetoact) [![Android Weekly](https://img.shields.io/badge/Android%20Weekly-%23336-blue.svg)](http://androidweekly.net/issues/issue-336) [![License](https://img.shields.io/badge/license-MIT%20License-brightgreen.svg)](https://opensource.org/licenses/MIT) [![Twitter](https://img.shields.io/badge/Twitter-@cortinico-blue.svg?style=flat)](http://twitter.com/cortinico) [![Awesome Kotlin Badge](https://kotlin.link/awesome-kotlin.svg)](https://github.com/KotlinBy/awesome-kotlin)
 
 A simple *Slide to Unlock* **Material** widget for **Android**, written in [**Kotlin**](https://github.com/JetBrains/kotlin) 🇰.
 
@@ -18,10 +18,15 @@ A simple *Slide to Unlock* **Material** widget for **Android**, written in [**Ko
         * [``text``, ``text_size``, ``text_style``, ``text_appearance``](#text-text_size-text_style-text_appearance)
         * [``slider_height``](#slider_height)
         * [``slider_locked``](#slider_locked)
+        * [``animation_duration``](#animation_duration)
         * [``slider_reversed``](#slider_reversed)
         * [``slider_icon``](#slider_icon)
+        * [``complete_icon``](#complete_icon)
+        * [``bump_vibration``](#bump_vibration)
         * [``rotate_icon``](#rotate_icon)
         * [``android:elevation``](#androidelevation)
+        * [``state_complete``](#state_complete)
+        * [``bounce_on_start``](#bounce_on_start)
     * [Event callbacks](#event-callbacks)
 * [Demo](#demo-)
 * [Building/Testing](#buildingtesting-)
@@ -30,27 +35,20 @@ A simple *Slide to Unlock* **Material** widget for **Android**, written in [**Ko
     * [Building locally](#building-locally)
     * [Testing](#testing)
 * [Contributing](#contributing-)
+* [Honorable Mentions](#honorable-mentions-)
 * [License](#license-)
 
 ## Getting Started 👣
 
-**Slide To Act** is distributed through [JCenter](https://bintray.com/bintray/jcenter?filterByPkgName=slidetoact). To use it you need to add the following **Gradle dependency** to your **android app gradle file** (NOT the root file).
+**Slide To Act** is distributed through [Maven Central](https://search.maven.org/artifact/com.ncorti/slidetoact). To use it you need to add the following **Gradle dependency** to your **android app gradle file** (NOT the root file):
 
-If you're using the Android Gradle plugin version 3:
 ```groovy
 dependencies {
-   implementation 'com.ncorti:slidetoact:0.7.0'
+   implementation "com.ncorti:slidetoact:0.11.0"
 }
 ```
 
-If you're using an Older version of the Android Gradle plugin:
-```groovy
-dependencies {
-   compile 'com.ncorti:slidetoact:0.7.0'
-}
-```
-
-Or you can download the .AAR artifact [directly from Bintray](https://bintray.com/cortinico/maven/download_file?file_path=com%2Fncorti%2Fslidetoact%2F0.6.0%2Fslidetoact-0.6.0.aar).
+Or you can download the .AAR artifact [directly from Maven Central](https://search.maven.org/artifact/com.ncorti/slidetoact/0.11.0/aar).
 
 ## Example 🚸
 
@@ -95,13 +93,15 @@ By the default, every ``SlideToActView`` widget fits to your app using the ``col
     android:layout_height="wrap_content"
     android:elevation="6dp"
     app:area_margin="4dp"
+    app:animation_duration="250"
     app:outer_color="@color/green"
     app:inner_color="@color/grey"
     app:border_radius="2dp"
     app:text="Testing all the custom attributes"
     app:text_size="12sp"
     app:slider_height="80dp"
-    app:slider_locked="false" />
+    app:slider_locked="false"
+    app:bounce_on_start="true" />
 ```
 
 #### ``area_margin``
@@ -109,6 +109,34 @@ By the default, every ``SlideToActView`` widget fits to your app using the ``col
 Use the ``area_marging`` attribute to control the **margin of the inner circular button** from the outside area. If not set, this attribute defaults to **8dp**.
 
 <p align="center"><img src="assets/area_margin_1.png" alt="area_margin_1" width="40%"/> <img src="assets/area_margin_2.png" alt="area_margin_2" width="40%"/></p>
+
+You can also use a **negative** value to have the inner circular button bigger than the slider. To achieve this effect you also need to set `android:clipChildren="false"` on the parent layout, like:
+
+```xml
+<FrameLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clipChildren="false">
+
+    <com.ncorti.slidetoact.SlideToActView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:area_margin="-8dp"/>
+```
+
+to obtain this behavior:
+
+<p align="center"><img src="assets/area_margin_3.png" alt="area_margin_3" width="40%"/></p>
+
+#### ``icon_margin``
+
+The attribute ``icon_margin`` let you control the margin of the icon inside the circular button. This makes the icon bigger because can take up more space in the button. 
+
+This is especially useful when you want to make the height of the slider smaller (see ``slider_height``). In this case, if you don't adjust the ``icon_margin`` the image can be too much tiny. By default, the ``icon_margin`` is set to 16dp.
+
+In next image you can see how it looks like:
+
+<p align="center"><img src="assets/icon_margin_1.png" alt="icon_margin" width="40%"/> <img src="assets/icon_margin_2.png" alt="icon_margin" width="40%"/></p>
 
 #### ``inner_color`` & ``outer_color``
 
@@ -158,6 +186,17 @@ SlideToActView sta = (SlideToActView) findViewById(R.id.slider);
 sta.setLocked(true);
 ```
 
+#### ``animation_duration``
+
+Use the ``animation_duration`` attribute to **set the duration** of the complete and reset animation (in milliseconds).
+
+You can also set animation duration programmatically with the provided setter.
+
+```kotlin
+val sta = (SlideToActView) findViewById(R.id.slider);
+sta.animDuration = 600
+```
+
 #### ``slider_reversed``
 
 Use the ``slider_reversed`` attribute to **reverse the slider** (this is a boolean attribute). When a slider is reversed, the cursor will appear on the right and will progress to the left. (default is false).
@@ -185,7 +224,32 @@ You can set a custom icon by setting the ``slider_icon``attribute to a drawable 
 app:slider_icon="@drawable/custom_icon"
 ```
 
+You can also set a custom icon programmatically with the provided setter.
+
+```java
+SlideToActView sta = findViewById(R.id.slider);
+sta.setSliderIcon(R.drawable.custom_icon);
+```
+
 You can also disable the rotation by setting the ``rotate_icon`` attribute to false.
+
+#### ``complete_icon``
+You can set a custom complete icon by setting the ``complete_icon``attribute to a drawable resource.
+
+<p align="center">
+  <img src="assets/complete_icon.gif" alt="custom_complete_iconcon" width="40%"/>
+</p>
+
+```xml
+app:complete_icon="@drawable/slidetoact_ic_check"
+```
+
+You can also set a custom complete icon programmatically with the provided setter.
+
+```java
+SlideToActView sta = findViewById(R.id.slider);
+sta.setCompleteIcon(R.drawable.custom_complete_animated);
+```
 
 #### ``slider_icon_color``
 
@@ -197,11 +261,73 @@ You can set a custom color for the icon by setting the ``slider_icon_color`` att
 
 This attribute defaults to the ``outer_color`` if set. If ``outer_color`` is not set, this attribute defaults to **colorAccent** from your theme.
 
+#### ``bump_vibration``
+
+You can make the device vibrate when the cursor "bumps" to the end of the sliding path by setting the period of vibration through bump_vibration attribute in your layout XML (default is 0)
+
+```xml
+app:bump_vibration="50"
+```
+
+Note that the period of vibration is in milliseconds
+
+You can achieve the same programmatically using the setter:
+
+```java
+SlideToActView sta = (SlideToActView) findViewById(R.id.slider);
+sta.setBumpVibration(50);
+```
+
+In order for this feature to work, you need have the permission ```android.permission.VIBRATE``` in your AndroidManifest.xml
+
+```xml
+<uses-permission android:name="android.permission.VIBRATE"/>
+```
+
 #### ``android:elevation``
 
 Use the ``android:elevation`` attribute to set the **elevation** of the widget. The widgets will take care of providing the proper ``ViewOutlineProvider`` during the whole animation (a.k.a. The shadow will be drawn properly).
 
 <p align="center"><img src="assets/elevation_1.png" alt="elevation_1" width="40%"/> <img src="assets/elevation_2.png" alt="elevation_2" width="40%"/></p>
+
+#### ``state_complete``
+
+Use ``state_complete`` attribute to create ``SlideToActView`` in complete state.
+
+```xml
+app:state_complete="true"
+```
+
+Can be also set programmatically. 
+
+With full slide animation:
+
+```java
+SlideToActView sta = (SlideToActView) findViewById(R.id.slider);
+sta.setCompleted(completed: true, withAnimation: true);
+```
+
+Without slide animation:
+
+```java
+SlideToActView sta = (SlideToActView) findViewById(R.id.slider);
+sta.setCompleted(completed: true, withAnimation: false);
+```
+
+<p align="center">
+    <img src="assets/complete.png" alt="complete" width="40%"/>
+</p>
+
+#### ``bounce_on_start``
+
+You can enable a bounce animation for the slider when the view is first rendered by setting the ``bounce_on_start`` attribute to true (default is false)
+Also you can set the duration of the bounce animation by setting the ``bounce_duration`` attribute (default is 2000)
+and repeat count by setting the ``bounce_repeat`` attribute (default is INFINITE)
+
+<p align="center">
+  <img src="assets/bounce_on_start.gif" alt="bounce on start gif"/>
+</p>
+
 
 ### Event callbacks
 
@@ -269,6 +395,10 @@ Make sure your tests are all green ✅ locally before submitting PRs.
 
 * When reporting a new Issue, make sure to attach **Screenshots**, **Videos** or **GIFs** of the problem you are reporting.
 * When submitting a new PR, make sure tests are all green. Write new tests if necessary.
+
+## Honorable mentions 🎖
+
+* [flutter-slide-to-act](https://github.com/imtoori/flutter-slide-to-act) - A porting of this widget for Flutter
 
 ## License 📄
 

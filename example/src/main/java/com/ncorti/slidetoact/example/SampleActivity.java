@@ -1,13 +1,14 @@
 package com.ncorti.slidetoact.example;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.ncorti.slidetoact.SlideToActView;
 
@@ -32,44 +33,53 @@ public class SampleActivity extends AppCompatActivity {
         final int pressedButton = getIntent().getExtras().getInt(EXTRA_PRESSED_BUTTON, 0);
         dateFormat = new SimpleDateFormat("HH:mm:ss", getResources().getConfiguration().locale);
 
-        switch (pressedButton) {
-            case R.id.button_area_margin:
-                setContentView(R.layout.content_area_margin);
-                break;
-            case R.id.button_colors:
-                setContentView(R.layout.content_color);
-                break;
-            case R.id.button_border_radius:
-                setContentView(R.layout.content_border_radius);
-                break;
-            case R.id.button_elevation:
-                setContentView(R.layout.content_elevation);
-                break;
-            case R.id.button_text_size:
-                setContentView(R.layout.content_text_size);
-                break;
-            case R.id.button_slider_dimension:
-                setContentView(R.layout.content_slider_dimensions);
-                break;
-            case R.id.button_event_callbacks:
-                setContentView(R.layout.content_event_callbacks);
-                setupEventCallbacks();
-                break;
-            case R.id.button_locked_slider:
-                setContentView(R.layout.content_locked_slider);
-                break;
-            case R.id.button_custom_icon:
-                setContentView(R.layout.content_custom_icon);
-                break;
-            case R.id.button_reversed_slider:
-                setContentView(R.layout.content_reversed_slider);
-                break;
-            default:
-                finish();
-                break;
+        if (pressedButton == R.id.button_area_margin) {
+            setContentView(R.layout.content_area_margin);
+        } else if (pressedButton == R.id.button_icon_margin) {
+            setContentView(R.layout.content_icon_margin);
+        } else if (pressedButton == R.id.button_colors) {
+            setContentView(R.layout.content_color);
+        } else if (pressedButton == R.id.button_border_radius) {
+            setContentView(R.layout.content_border_radius);
+        } else if (pressedButton == R.id.button_elevation) {
+            setContentView(R.layout.content_elevation);
+        } else if (pressedButton == R.id.button_text_size) {
+            setContentView(R.layout.content_text_size);
+        } else if (pressedButton == R.id.button_slider_dimension) {
+            setContentView(R.layout.content_slider_dimensions);
+        } else if (pressedButton == R.id.button_event_callbacks) {
+            setContentView(R.layout.content_event_callbacks);
+            setupEventCallbacks();
+        } else if (pressedButton == R.id.button_locked_slider) {
+            setContentView(R.layout.content_locked_slider);
+        } else if (pressedButton == R.id.button_custom_icon) {
+            setContentView(R.layout.content_custom_icon);
+            final SlideToActView slider = findViewById(R.id.slide_custom_icon);
+            View.OnClickListener listener = view -> {
+                int viewId = view.getId();
+                if (viewId == R.id.button_android_icon) {
+                    slider.setSliderIcon(R.drawable.ic_android);
+                } else if (viewId == R.id.button_cloud_icon) {
+                    slider.setSliderIcon(R.drawable.ic_cloud);
+                } else if (viewId == R.id.button_complete_icon) {
+                    slider.setCompleteIcon(R.drawable.custom_complete_animated);
+                }
+            };
+            findViewById(R.id.button_android_icon).setOnClickListener(listener);
+            findViewById(R.id.button_cloud_icon).setOnClickListener(listener);
+            findViewById(R.id.button_complete_icon).setOnClickListener(listener);
+        } else if (pressedButton == R.id.button_reversed_slider) {
+            setContentView(R.layout.content_reversed_slider);
+        } else if (pressedButton == R.id.button_animation_duration) {
+            setContentView(R.layout.content_animation_duration);
+        } else if (pressedButton == R.id.button_bump_vibration) {
+            setContentView(R.layout.content_bumb_vibration);
+        } else if (pressedButton == R.id.button_completed) {
+            setContentView(R.layout.content_completed);
+        } else if (pressedButton == R.id.button_bounce) {
+            setContentView(R.layout.content_bounce_animation);
         }
         mSlideList = getSlideList();
-
     }
 
     private List<SlideToActView> getSlideList() {
@@ -91,15 +101,14 @@ public class SampleActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.reset:
-                for (SlideToActView slide : mSlideList) {
-                    slide.resetSlider();
-                }
-                return true;
-            case android.R.id.home:
-                finish();
-                return true;
+        if (item.getItemId() == R.id.reset) {
+            for (SlideToActView slide : mSlideList) {
+                slide.setCompleted(false, true);
+            }
+            return true;
+        } else if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }

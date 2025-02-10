@@ -11,54 +11,50 @@
         android:clipToPadding="false"
         android:orientation="vertical">
 
-        <!-- No Text -->
         <com.ncorti.slidetoact.SlideToActView
+            android:id="@+id/slide_1"
             style="@style/SlideToActView.Example"
-            app:text="" />
+            app:icon_margin="0dp"
+            app:text="Icon margin 0dp" />
 
         <com.ncorti.slidetoact.SlideToActView
             style="@style/SlideToActView.Example"
-            app:text_style="bold"
-            app:text="TextStyle Bold"/>
+            app:icon_margin="2dp"
+            app:text="Icon margin 2dp" />
 
         <com.ncorti.slidetoact.SlideToActView
             style="@style/SlideToActView.Example"
-            app:text_style="italic"
-            app:text="TextStyle Italic"/>
+            app:icon_margin="4dp"
+            app:text="Icon margin 4dp" />
 
         <com.ncorti.slidetoact.SlideToActView
             style="@style/SlideToActView.Example"
-            app:text_size="12sp"
-            app:text="TextSize 12sp" />
+            app:icon_margin="8dp"
+            app:text="Icon margin 8dp" />
 
         <com.ncorti.slidetoact.SlideToActView
             style="@style/SlideToActView.Example"
-            app:text_size="14sp"
-            app:text="TextSize 14sp" />
+            app:icon_margin="12dp"
+            app:text="Icon margin 12dp" />
 
         <com.ncorti.slidetoact.SlideToActView
             style="@style/SlideToActView.Example"
-            app:text_size="16sp"
-            app:text="TextSize 16sp" />
+            app:icon_margin="16dp"
+            app:text="Icon margin 16dp (default)" />
 
         <com.ncorti.slidetoact.SlideToActView
             style="@style/SlideToActView.Example"
-            app:text_size="18sp"
-            app:text="TextSize 18sp" />
+            app:icon_margin="20dp"
+            app:text="Icon margin 20dp" />
 
         <com.ncorti.slidetoact.SlideToActView
             style="@style/SlideToActView.Example"
-            app:text_appearance="@style/TextAppearanceAllCaps"
-            app:text="TextAppearance - All caps" />
+            app:icon_margin="24dp"
+            app:text="Icon margin 24dp" />
 
         <com.ncorti.slidetoact.SlideToActView
             style="@style/SlideToActView.Example"
-            app:text_appearance="@style/TextAppearanceBlueShadow"
-            app:text="TextAppearance - Blue Shadow" />
-
-        <com.ncorti.slidetoact.SlideToActView
-            style="@style/SlideToActView.Example"
-            app:text_appearance="@style/TextAppearanceCustomFont"
-            app:text="Custom font" />
+            app:icon_margin="28dp"
+            app:text="Icon margin 28dp" />
     </LinearLayout>
 </ScrollView>

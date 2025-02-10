@@ -3,7 +3,7 @@ package com.ncorti.slidetoact.example;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,6 +22,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ((TextView) findViewById(R.id.welcome_text)).setText("Welcome 😁");
 
         findViewById(R.id.button_area_margin).setOnClickListener(this);
+        findViewById(R.id.button_icon_margin).setOnClickListener(this);
         findViewById(R.id.button_colors).setOnClickListener(this);
         findViewById(R.id.button_border_radius).setOnClickListener(this);
         findViewById(R.id.button_elevation).setOnClickListener(this);
@@ -31,6 +32,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.button_locked_slider).setOnClickListener(this);
         findViewById(R.id.button_custom_icon).setOnClickListener(this);
         findViewById(R.id.button_reversed_slider).setOnClickListener(this);
+        findViewById(R.id.button_animation_duration).setOnClickListener(this);
+        findViewById(R.id.button_bump_vibration).setOnClickListener(this);
+        findViewById(R.id.button_completed).setOnClickListener(this);
+        findViewById(R.id.button_bounce).setOnClickListener(this);
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -41,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.reset) {
-            ((SlideToActView) findViewById(R.id.welcome_slider)).resetSlider();
+            ((SlideToActView) findViewById(R.id.welcome_slider)).setCompleted(false, true);
         }
         return super.onOptionsItemSelected(item);
     }
